@@ -11,6 +11,9 @@ const updateData = (response, value) => {
     response.status(200).send(value);
   });
 };
+const errorResponse = (response, value) => {
+  response.status(404).send(`Person with ID: ${value} not founded!`);
+};
 
 const getAll = (req, res) => {
   //когда мы отправляем через send - мы отправляем text/html
@@ -23,8 +26,8 @@ const getAll = (req, res) => {
 const add = (req, res) => {
   const personId = people.length + 1;
   const person = req.body;
-  people.push({ id: personId, ...person });
 
+  people.push({ id: personId, ...person });
   updateData(res, `${person.name} has been added!`);
 };
 const getById = (req, res) => {
@@ -34,7 +37,7 @@ const getById = (req, res) => {
   if (person) {
     res.status(200).json(person);
   } else {
-    res.status(404).send(`Person with ID: ${paramId} not founded!`);
+    errorResponse(res, paramId);
   }
 };
 const update = (req, res) => {
@@ -47,7 +50,7 @@ const update = (req, res) => {
     people[indexOfPerson] = personToUpdate;
     updateData(res, personToUpdate);
   } else {
-    res.status(404).send(`Person with ID: ${paramId} not founded!`);
+    errorResponse(res, paramId);
   }
 };
 const remove = (req, res) => {
@@ -58,7 +61,7 @@ const remove = (req, res) => {
     people = people.filter((a) => a.id !== paramId);
     updateData(res, `Person with ID ${paramId} has been deleted!`);
   } else {
-    res.status(404).send(`Person with ID ${paramId} not founded!`);
+    errorResponse(res, paramId);
   }
 };
 
