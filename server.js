@@ -6,6 +6,7 @@ const bodyParser = require("body-parser");
 const fs = require("fs");
 let people = require("./data/people.json");
 
+// utils
 const updateData = (response, value) => {
   fs.writeFile("./data/people.json", JSON.stringify(people), (err) => {
     response.status(200).send(value);
@@ -14,7 +15,16 @@ const updateData = (response, value) => {
 const errorResponse = (response, value) => {
   response.status(404).send(`Person with ID: ${value} not founded!`);
 };
+const getInformation = (request) => {
+  const paramId = Number(request.params.id);
+  const person = people.find((a) => a.id === paramId);
+  return {
+    paramId,
+    person,
+  };
+};
 
+// CRUD Operations
 const getAll = (req, res) => {
   //когда мы отправляем через send - мы отправляем text/html
   res.status(200).json({
@@ -31,37 +41,34 @@ const add = (req, res) => {
   updateData(res, `${person.name} has been added!`);
 };
 const getById = (req, res) => {
-  const paramId = Number(req.params.id);
-  const person = people.find((a) => a.id === paramId);
+  const data = getInformation(req);
 
-  if (person) {
-    res.status(200).json(person);
+  if (data.person) {
+    res.status(200).json(data.person);
   } else {
-    errorResponse(res, paramId);
+    errorResponse(res, data.paramId);
   }
 };
 const update = (req, res) => {
-  const paramId = Number(req.params.id);
-  const personToUpdate = people.find((a) => a.id === paramId);
-  const indexOfPerson = people[paramId - 1];
+  const data = getInformation(req);
+  const indexOfPerson = people[data.paramId - 1];
 
-  if (personToUpdate) {
-    Object.assign(personToUpdate, req.body);
-    people[indexOfPerson] = personToUpdate;
-    updateData(res, personToUpdate);
+  if (data.person) {
+    Object.assign(data.person, req.body);
+    people[indexOfPerson] = data.person;
+    updateData(res, data.person);
   } else {
-    errorResponse(res, paramId);
+    errorResponse(res, data.paramId);
   }
 };
 const remove = (req, res) => {
-  const paramId = Number(req.params.id);
-  const personToDelete = people.find((a) => a.id === paramId);
+  const data = getInformation(req);
 
-  if (personToDelete) {
-    people = people.filter((a) => a.id !== paramId);
-    updateData(res, `Person with ID ${paramId} has been deleted!`);
+  if (data.person) {
+    people = people.filter((a) => a.id !== data.paramId);
+    updateData(res, `Person with ID ${data.paramId} has been deleted!`);
   } else {
-    errorResponse(res, paramId);
+    errorResponse(res, data.paramId);
   }
 };
 
