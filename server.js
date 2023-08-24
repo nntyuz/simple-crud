@@ -1,29 +1,10 @@
-//Without Express js
-// const http = require('http');
-// const hostname = "127.0.0.1";
-// const port = 3000;
-
-// const server = http.createServer((req, res) => {
-//   res.statusCode = 200;
-//   res.setHeader("Content-Type", "text/plain");
-//   res.end('May Node be with you');
-// });
-
-// server.listen(port, hostname, () => {
-//   console.log(`Server running at http://${hostname}:${port}`);
-// });
-
-//With Express
 const express = require("express");
 const app = express();
 const port = 3000;
 
 const bodyParser = require("body-parser");
 const fs = require("fs");
-const { v4: uuidv4 } = require("uuid");
 let people = require("./data/people.json");
-
-app.use(bodyParser.json());
 
 const updateData = (response, value) => {
   fs.writeFile("./data/people.json", JSON.stringify(people), (err) => {
@@ -32,14 +13,13 @@ const updateData = (response, value) => {
 };
 
 const getAll = (req, res) => {
-  //когда мы отправляем через send мы отправляем text/html
+  //когда мы отправляем через send - мы отправляем text/html
   res.status(200).json({
     status: "success",
     count: people.length,
     people,
   });
 };
-
 const add = (req, res) => {
   const personId = people.length + 1;
   const person = req.body;
@@ -47,19 +27,16 @@ const add = (req, res) => {
 
   updateData(res, `${person.name} has been added!`);
 };
-
 const getById = (req, res) => {
   const paramId = Number(req.params.id);
   const person = people.find((a) => a.id === paramId);
 
-  // Проверка на айдишник
   if (person) {
     res.status(200).json(person);
   } else {
     res.status(404).send(`Person with ID: ${paramId} not founded!`);
   }
 };
-
 const update = (req, res) => {
   const paramId = Number(req.params.id);
   const personToUpdate = people.find((a) => a.id === paramId);
@@ -85,12 +62,15 @@ const remove = (req, res) => {
   }
 };
 
-app.get("/api/people", getAll);
-app.post("/api/people", add);
-app.get("/api/people/:id", getById);
-app.patch("/api/people/:id", update);
-app.put("/api/people/:id", update);
-app.delete("/api/people/:id", remove);
+app.use(bodyParser.json());
+
+app.route("/api/people").get(getAll).post(add);
+app
+  .route("/api/people/:id")
+  .get(getById)
+  .patch(update)
+  .put(update)
+  .delete(remove);
 
 app.listen(port, () => {
   console.log(`Server listen on http://localhost:${port}/`);
