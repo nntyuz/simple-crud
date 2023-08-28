@@ -6,6 +6,7 @@ const db = require("./utils/api.js");
 app.use(bodyParser.json());
 
 app.get("/api/v1/cars", db.getAllCars);
+app.get("/api/v1/cars/:id", db.getCarById);
 app.post("/api/v1/cars", db.addCar);
 app.patch("/api/v1/cars/:id", db.updateCar);
 app.delete("/api/v1/cars/:id", db.deleteCar);

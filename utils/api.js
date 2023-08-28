@@ -15,8 +15,26 @@ const getAllCars = async (req, res) => {
   }
 };
 
+const getCarById = async (req, res) => {
+  const car = await knex("CARS")
+    .column(["id", "model", "year"])
+    .select()
+    .where("id", req.params.id);
+  try {
+    res.status(200).json({
+      message: "Success",
+      car,
+    });
+  } catch (error) {
+    res.status(404).json({
+      message: "Error",
+      error: error,
+    });
+  }
+};
+
 const addCar = async (req, res) => {
-  const car = await knex("CARS").insert(req.body);
+  await knex("CARS").insert(req.body);
   try {
     res.status(201).json({
       message: "Success",
@@ -31,9 +49,7 @@ const addCar = async (req, res) => {
 };
 
 const updateCar = async (req, res) => {
-  const updatedCar = await knex("CARS")
-    .where("id", req.params.id)
-    .update(req.body);
+  await knex("CARS").where("id", req.params.id).update(req.body);
   const cars = await knex("CARS").select("*");
   try {
     res.status(201).json({
@@ -49,7 +65,7 @@ const updateCar = async (req, res) => {
 };
 
 const deleteCar = async (req, res) => {
-  const deleteCar = await knex("CARS").where("id", req.params.id).del();
+  await knex("CARS").where("id", req.params.id).del();
   const cars = await knex("CARS").select("*");
   try {
     res.status(200).json({
@@ -66,6 +82,7 @@ const deleteCar = async (req, res) => {
 
 module.exports = {
   getAllCars,
+  getCarById,
   addCar,
   updateCar,
   deleteCar,
